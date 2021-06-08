@@ -28,6 +28,7 @@ export const flagsMode = ({ layout, currentIndex, keyPage, flags, actions }: {
             margin: toolButtonMargin,
             key: 'div-space',
         }),
+        div({ key: '', style: {}, class: '' }, "flags"),
         switchButton({
             borderWidth: 1,
             width: layout.buttons.size.width,

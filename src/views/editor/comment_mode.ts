@@ -13,6 +13,7 @@ export const commentMode = ({ layout, currentIndex, actions }: {
     const toolButtonMargin = 5;
 
     return div({ style: toolStyle(layout) }, [
+        div({ key: '', style: {}, class: '' }, "comment"),
         toolButton({
             borderWidth: 1,
             width: layout.buttons.size.width,

@@ -23,6 +23,8 @@ import { fillRowMode } from './fill_row_mode';
 import { pieceSelectMode } from './piece_select_mode';
 import { navigatorElement } from '../navigator';
 import { commentMode } from './comment_mode';
+import { MenuModal } from '../../components/modals/menu';
+import { OpenFumenModal } from '../../components/modals/open';
 
 export interface EditorLayout {
     canvas: {
@@ -57,7 +59,7 @@ const getLayout = (
 
     const canvasSize = {
         width,
-        height: height - (toolsHeight + commentHeight + topLeftY),
+        height: height - (toolsHeight + commentHeight + topLeftY + 214),
     };
 
     const blockSize = Math.min(
@@ -257,7 +259,70 @@ const ScreenField = (state: State, actions: Actions, layout: EditorLayout) => {
                 guideLineColor: state.fumen.guideLineColor,
             }),
 
-            getMode(),
+            // getMode(),
+
+            [blockMode({
+                layout,
+                actions,
+                colorize: guideLineColor,
+                modePiece: state.mode.piece,
+            })],
+            toolMode({
+                layout,
+                actions,
+                keyPage,
+                touchType: state.mode.touch,
+                currentIndex: state.fumen.currentIndex,
+            }),
+            flagsMode({
+                layout,
+                actions,
+                keyPage,
+                flags: page.flags,
+                currentIndex: state.fumen.currentIndex,
+            }),
+            utilsMode({
+                layout,
+                actions,
+                touchType: state.mode.touch,
+            }),
+            commentMode({
+                layout,
+                actions,
+                currentIndex: state.fumen.currentIndex,
+            }),
+            slideMode({
+                layout,
+                actions,
+            }),
+            // fillMode({
+            //     layout,
+            //     actions,
+            //     colorize: guideLineColor,
+            //     modePiece: state.mode.piece,
+            // }),
+            // fillRowMode({
+            //     layout,
+            //     actions,
+            //     colorize: guideLineColor,
+            //     modePiece: state.mode.piece,
+            // }),
+            pieceMode({
+                layout,
+                actions,
+                move: page !== undefined ? page.piece : undefined,
+                existInferences: 0 < state.events.inferences.length,
+                pages: state.fumen.pages,
+                flags: page.flags,
+                touchType: state.mode.touch,
+                currentIndex: state.fumen.currentIndex,
+            }),
+            [pieceSelectMode({
+                layout,
+                actions,
+                currentIndex: state.fumen.currentIndex,
+                colorize: guideLineColor,
+            })],
         ];
     };
 
@@ -271,7 +336,7 @@ const ScreenField = (state: State, actions: Actions, layout: EditorLayout) => {
             alignItems: 'center',
             userSelect: 'none',
         }),
-    }, getChildren());
+    }, getChildren() as any);
 };
 
 const Events = (state: State, actions: Actions) => {
@@ -377,10 +442,17 @@ export const view: View<State, Actions> = (state, actions) => {
     }, [ // Hyperappでは最上位のノードが最後に実行される
         resources.konva.stage.isReady ? Events(state, actions) : undefined as any,
 
-        navigatorElement({
-            palette,
+        // Open in Hard Drop
+        // navigatorElement({
+        //     palette,
+        //     actions,
+        //     height: navigatorHeight,
+        // }),
+
+        OpenFumenModal({
             actions,
-            height: navigatorHeight,
+            errorMessage: state.fumen.errorMessage,
+            textAreaValue: state.fumen.value !== undefined ? state.fumen.value : '',
         }),
 
         ScreenField(state, actions, layout),
@@ -392,5 +464,16 @@ export const view: View<State, Actions> = (state, actions) => {
 
             Tools(state, actions, layout.tools.size.height, palette),
         ]),
+
+        MenuModal({
+            actions,
+            pages: state.fumen.pages,
+            version: state.version,
+            screen: state.mode.screen,
+            currentIndex: state.fumen.currentIndex,
+            maxPageIndex: state.fumen.maxPage,
+            comment: state.mode.comment,
+            state: state
+        }),
     ]);
 };

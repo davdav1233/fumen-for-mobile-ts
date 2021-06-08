@@ -9,6 +9,7 @@ import { Page } from '../lib/fumen/types';
 import { memento } from '../memento';
 import { HighlightType } from '../state_types';
 import { getBlockPositions } from '../lib/piece';
+import { convertToGoalField } from "../actions/convert";
 
 interface PutPieceActions {
     fixInferencePiece(): action;
@@ -99,23 +100,30 @@ export const putPieceActions: Readonly<PutPieceActions> = {
             return undefined;
         }
 
-        // 追加
+        // 追加 추가
         const inferences = state.events.inferences;
         if (piece !== Piece.Empty) {
-            // 4つ以上あるとき
+            // 4つ以上あるとき 4개 이상 있을 때
             if (4 <= inferences.length) {
                 return undefined;
             }
 
-            // すでに表示上にブロックがある
-            if (state.field[index].piece !== Piece.Empty && state.field[index].highlight !== HighlightType.Lighter) {
-                return undefined;
-            }
+            // すでに表示上にブロックがある 이미 표시상에 블록이 있다
+            // if (state.field[index].piece !== Piece.Empty && state.field[index].highlight !== HighlightType.Lighter) {
+            //     return undefined;
+            // }
 
-            // まだ存在しないとき
+            // まだ存在しないとき 아직 존재하지 않을 때
             if (inferences.find(e => e === index) === undefined) {
                 const nextInterences = state.events.inferences.concat([index]);
                 return sequence(state, [
+                    // re: convertToGray `src/actions/convert.ts`
+                    // need to delete blocks behind piece
+                    convertToGoalField(field => {
+                        const copy = field.copy();
+                        copy.deleteAt(index);
+                        return copy;
+                    }),
                     () => ({
                         events: {
                             ...state.events,

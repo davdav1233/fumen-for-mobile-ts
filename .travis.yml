@@ -1,0 +1,34 @@
+stages:
+- name: deploy-dev
+  if: branch != main
+- test
+- name: deploy-prod
+  if: branch = main
+
+jobs:
+  include:
+  - stage: deploy-prod
+    language: node_js
+    node_js: 10
+    cache:
+      yarn: true
+      directories:
+      - node_modules
+      - ~/.cache
+    install:
+      yarn install --frozen-lockfile
+    script:
+    - yarn webpack-prod
+    before_deploy:
+    - touch public/.nojekyll
+    - git checkout public/manifest.json
+    deploy:
+    - provider: pages
+      skip-cleanup: true
+      github-token: ${GITHUB_TOKEN}
+      keep-history: false
+      repo: davdav1233/fumen-for-mobile-ts
+      local-dir: public/
+      target-branch: gh-pages
+      on:
+        branch: main

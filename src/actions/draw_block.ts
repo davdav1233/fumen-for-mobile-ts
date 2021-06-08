@@ -132,20 +132,20 @@ export const drawBlockActions: Readonly<DrawBlockActions> = {
             return undefined;
         }
 
-        // 追加
+        // 追加 추가
         const inferences = state.events.inferences;
         if (piece !== Piece.Empty) {
-            // 4つ以上あるとき
+            // 4つ以上あるとき 4개 이상 있을 때
             if (4 <= inferences.length) {
                 return undefined;
             }
 
-            // すでに表示上にブロックがある
-            if (state.field[index].piece !== Piece.Empty && state.field[index].highlight !== HighlightType.Lighter) {
-                return undefined;
-            }
+            // すでに表示上にブロックがある 이미 표시상에 블록이 있다
+            // if (state.field[index].piece !== Piece.Empty && state.field[index].highlight !== HighlightType.Lighter) {
+            //     return undefined;
+            // }
 
-            // まだ存在しないとき
+            // まだ存在しないとき 아직 존재하지 않을 때
             if (inferences.find(e => e === index) === undefined) {
                 const nextInterences = state.events.inferences.concat([index]);
                 return sequence(state, [
@@ -161,7 +161,7 @@ export const drawBlockActions: Readonly<DrawBlockActions> = {
             }
         }
 
-        // 削除
+        // 削除 삭제
         if (piece === Piece.Empty) {
             return sequence(state, [
                 () => ({
@@ -222,7 +222,7 @@ export const drawBlockActions: Readonly<DrawBlockActions> = {
 const startDrawingField = (state: State, index: number, isField: boolean): NextState => {
     const currentPageIndex = state.fumen.currentIndex;
 
-    // 塗りつぶすpieceを決める
+    // 塗りつぶすpieceを決める 빈틈없이 칠할 piece를 정하다
     const block = isField ? state.field[index] : state.sentLine[index];
     const piece = block.piece !== state.mode.piece ? state.mode.piece : Piece.Empty;
     if (piece === undefined) {
@@ -246,13 +246,13 @@ const moveDrawingField = (state: State, index: number, isField: boolean): NextSt
     const pages = state.fumen.pages;
     const currentPageIndex = state.fumen.currentIndex;
 
-    // 塗りつぶすpieceを決める
+    // 塗りつぶすpieceを決める 빈틈없이 칠할 piece를 정하다
     const piece = state.events.piece;
     if (piece === undefined) {
         return undefined;
     }
 
-    // pieceに変化がないときは、表示を更新しない
+    // pieceに変化がないときは、表示を更新しない piece에 변화가 없을 때는, 표시를 갱신하지 않음
     const block = isField ? state.field[index] : state.sentLine[index];
     if (block.piece === piece) {
         return undefined;
@@ -265,7 +265,7 @@ const moveDrawingField = (state: State, index: number, isField: boolean): NextSt
         };
     }
 
-    // Blockを追加
+    // Blockを追加 Block 추가
     {
         const x = index % 10;
         const y = Math.floor(index / 10);
@@ -274,10 +274,10 @@ const moveDrawingField = (state: State, index: number, isField: boolean): NextSt
 
         const initPiece = state.cache.currentInitField.getAtIndex(index, isField);
         if (initPiece !== piece) {
-            // 操作の結果、最初のフィールドの状態から変化するとき
+            // 操作の結果、最初のフィールドの状態から変化するとき 조작 결과 최초 필드 상태에서 변화할 때
             page.commands.pre[key] = { x, y, piece, type };
         } else {
-            // 操作の結果、最初のフィールドの状態に戻るとき
+            // 操作の結果、最初のフィールドの状態に戻るとき 조작의 결과, 최초 필드 상태로 돌아갈 때
             delete page.commands.pre[key];
         }
     }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "webpack": "webpack --mode development",
+    "webpack": "webpack --mode development --watch",
     "webpack-prod": "webpack --mode production",
     "serve": "node serve.js",
     "lint": "tslint --project tsconfig.json --config tslint.json",

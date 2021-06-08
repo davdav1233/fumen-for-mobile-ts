@@ -24,6 +24,7 @@ export const pieceSelectMode = ({ layout, currentIndex, colorize, actions }: {
             margin: toolButtonMargin,
             key: 'div-space',
         }),
+        div({ key: '', style: {}, class: '' }, "piece")
     ].concat(pieces.map(piece => (
         colorButton({
             layout,

@@ -190,7 +190,7 @@ export const convertActions: Readonly<ConvertActions> = {
             actions.reopenCurrentPage(),
         ]);
     },
-    convertToGray: () => (state): NextState => {
+    convertToGray: () => (state): NextState => { //
         return sequence(state, [
             actions.removeUnsettledItems(),
             convertToGoalField((field) => {
@@ -214,7 +214,7 @@ export const convertActions: Readonly<ConvertActions> = {
     },
 };
 
-const convertToGoalField = (callback: (field: Field) => Field) => (state: State): NextState => {
+export const convertToGoalField = (callback: (field: Field) => Field) => (state: State): NextState => {
     const currentIndex = state.fumen.currentIndex;
     const pages = state.fumen.pages;
     const pagesObj = new Pages(pages);

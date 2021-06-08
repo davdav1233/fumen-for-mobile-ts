@@ -21,6 +21,7 @@ export const slideMode = ({ layout, actions }: {
             margin: toolButtonMargin,
             key: 'div-space',
         }),
+        div({ key: '', style: {}, class: '' }, "slide"),
         toolButton({
             borderWidth: 1,
             width: layout.buttons.size.width,

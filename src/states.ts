@@ -134,7 +134,7 @@ export const initState: Readonly<State> = {
     },
     modal: {
         fumen: false,
-        menu: false,
+        menu: true,
         append: false,
         clipboard: false,
         userSettings: false,
@@ -156,7 +156,8 @@ export const initState: Readonly<State> = {
         updated: false,
     },
     mode: {
-        screen: window.location.hash.includes('#/edit') ? Screens.Editor : Screens.Reader,
+        // screen: window.location.hash.includes('#/edit') ? Screens.Editor : Screens.Reader,
+        screen: Screens.Editor,
         type: ModeTypes.DrawingTool,
         touch: TouchTypes.Drawing,
         piece: undefined,  // UI上で選択されているのピースの種類

@@ -19,6 +19,7 @@ export const utilsMode = ({ layout, touchType, actions }: {
     const toolButtonMargin = 5;
 
     return div({ style: toolStyle(layout) }, [
+        div({ key: '', style: {}, class: '' }, "utils"),
         toolButton({
             borderWidth: 1,
             width: layout.buttons.size.width,

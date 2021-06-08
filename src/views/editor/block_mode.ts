@@ -23,6 +23,7 @@ export const blockMode = ({ layout, modePiece, colorize, actions }: {
             margin: toolButtonMargin,
             key: 'div-space',
         }),
+        div({ key: '', style: {}, class: '' }, "block · fill · fillrow")
     ].concat(pieces.map(piece => (
         colorButton({ layout, piece, colorize, onclick: actions.selectPieceColor, highlight: modePiece === piece })
     ))).concat([

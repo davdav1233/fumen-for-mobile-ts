@@ -52,6 +52,7 @@ export const pieceMode = ({ layout, currentIndex, touchType, move, pages, existI
             margin: toolButtonMargin,
             key: 'div-space',
         }),
+        div({ key: '', style: {}, class: '' }, "piece"),
         rotationButton({
             layout,
             rotation: operateRotation,
@@ -212,7 +213,7 @@ export const pieceMode = ({ layout, currentIndex, touchType, move, pages, existI
             datatest: 'btn-draw-piece',
             key: 'btn-draw-piece',
             enable: touchType === TouchTypes.Piece,
-            onclick: () => actions.changeToDrawPieceMode(),
+            onclick: () => actions.changeToDrawPieceMode(), //
             contents: iconContents({
                 description: '',
                 iconSize: 21,

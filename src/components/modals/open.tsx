@@ -27,7 +27,7 @@ export const OpenFumenModal: Component<OpenFumenModalProps> = ({ textAreaValue, 
     };
 
     const destroy = () => {
-        resources.modals.fumen = undefined;
+        // resources.modals.fumen = undefined;
     };
 
     const cancel = () => {
@@ -38,23 +38,23 @@ export const OpenFumenModal: Component<OpenFumenModalProps> = ({ textAreaValue, 
     };
 
     const oncreate = (element: HTMLDivElement) => {
-        const instance = M.Modal.init(element, {
-            onOpenEnd: () => {
-                const element = document.getElementById('input-fumen');
-                if (element !== null) {
-                    element.focus();
-                }
-            },
-            onCloseStart: () => {
-                actions.closeFumenModal();
-                actions.clearFumenData();
-                destroy();
-            },
-        });
+        // const instance = M.Modal.init(element, {
+        //     onOpenEnd: () => {
+        //         const element = document.getElementById('input-fumen');
+        //         if (element !== null) {
+        //             element.focus();
+        //         }
+        //     },
+        //     onCloseStart: () => {
+        //         actions.closeFumenModal();
+        //         actions.clearFumenData();
+        //         destroy();
+        //     },
+        // });
 
-        instance.open();
+        // instance.open();
 
-        resources.modals.fumen = instance;
+        // resources.modals.fumen = instance;
     };
 
     const update = ({ value }: { value: string }) => {
@@ -79,9 +79,9 @@ export const OpenFumenModal: Component<OpenFumenModalProps> = ({ textAreaValue, 
     return (
         <div key="open-fumen-modal-top">
             <div key="mdl-open-fumen" datatest="mdl-open-fumen"
-                 className="modal" oncreate={oncreate}>
-                <div key="modal-content" className="modal-content">
-                    <h4 key="open-fumen-label" dataTest="open-fumen-label">{i18n.OpenFumen.Title()}</h4>
+                oncreate={oncreate} style="padding: 0 28px;">
+                <div key="modal-content">
+                    <p key="open-fumen-label" dataTest="open-fumen-label">{i18n.OpenFumen.Title()}</p>
 
                     <TextArea key="input-fumen" dataTest="input-fumen" id="input-fumen"
                               placeholder={i18n.OpenFumen.PlaceHolder()} error={errorMessage === undefined}

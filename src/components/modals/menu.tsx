@@ -1,18 +1,26 @@
 import { Component, ComponentWithText, px, style } from '../../lib/types';
 import { h } from 'hyperapp';
-import { resources } from '../../states';
+import { resources, State } from '../../states';
 import { CommentType, Screens } from '../../lib/enums';
 import { i18n } from '../../locales/keys';
 import { Icon } from '../atomics/icons';
+import { ClipboardButton } from '../modals/clipboard'
+import { encode } from '../../lib/fumen/fumen';
+import { FumenError } from '../../lib/errors';
+import { AppendFumenModal } from '../modals/append'
+import { Page } from '../../lib/fumen/types';
+import { sequence } from '../..//actions/commons';
 
 declare const M: any;
 
 interface MenuProps {
     version: string;
+    pages: Page[];
     screen: Screens;
     currentIndex: number;
     maxPageIndex: number;
     comment: CommentType;
+    state: State
     actions: {
         closeMenuModal: () => void;
         changeToReaderScreen: () => void;
@@ -33,25 +41,26 @@ interface MenuProps {
     };
 }
 
+// the menu containing "readonly", "firstpage", "lastpage", etc.
 export const MenuModal: Component<MenuProps> = (
-    { version, screen, currentIndex, maxPageIndex, comment, actions },
+    { version, pages, screen, currentIndex, maxPageIndex, comment, actions, state },
 ) => {
     const oncreate = (element: HTMLDivElement) => {
-        const instance = M.Modal.init(element, {
-            onOpenEnd: () => {
-                const element = document.getElementById('textarea-fumen');
-                if (element !== null) {
-                    element.focus();
-                }
-            },
-            onCloseStart: () => {
-                actions.closeMenuModal();
-            },
-        });
+        // const instance = M.Modal.init(element, {
+        //     onOpenEnd: () => {
+        //         const element = document.getElementById('textarea-fumen');
+        //         if (element !== null) {
+        //             element.focus();
+        //         }
+        //     },
+        //     onCloseStart: () => {
+        //         actions.closeMenuModal();
+        //     },
+        // });
 
-        instance.open();
+        // instance.open();
 
-        resources.modals.menu = instance;
+        // resources.modals.menu = instance;
     };
 
     const ondestroy = () => {
@@ -72,26 +81,80 @@ export const MenuModal: Component<MenuProps> = (
         alignItems: 'center',
     });
 
+    // テト譜の変換
+    const encodePromise = (async () => {
+        const encoded = await encode(pages);
+        return `v115@${encoded}`;
+    })();
+
+    const clipboard = (domain: string) => () => {
+        encodePromise
+            .then((data) => {
+                // データをElementに保存する // 主にテスト用
+                document.body.setAttribute('datatest', 'copied-fumen-data');
+                document.body.setAttribute('data', data);
+                return data;
+            })
+            .then(data => `${domain}${data}`)
+            .then((url) => {
+                // コピー用のelementを作成
+                const element = document.createElement('pre');
+                if (element === undefined || element === null) {
+                    throw new FumenError('no element');
+                }
+
+                {
+                    const style = element.style;
+                    style.position = 'fixed';
+                    style.left = '-100%';
+                    element.textContent = url;
+                    document.body.appendChild(element);
+                }
+
+                // selection
+                const selection = document.getSelection();
+                if (selection === null) {
+                    throw new FumenError('no selection');
+                }
+
+                // クリップボードにコピーする
+                selection.selectAllChildren(element);
+                const success = document.execCommand('copy');
+                if (!success) {
+                    throw new FumenError('command error');
+                }
+
+                // コピー用のelementを削除
+                document.body.removeChild(element);
+            })
+            .then(() => {
+                M.toast({ html: 'Copied to clipboard', classes: 'top-toast', displayLength: 600 });
+            })
+            .catch((error) => {
+                M.toast({ html: `Failed to copy: ${error}`, classes: 'top-toast', displayLength: 1500 });
+            });
+    };
+
     return (
         <div key="menu-modal-top">
             <div key="mdl-open-fumen" datatest="mdl-open-fumen"
-                 className="modal bottom-sheet" oncreate={oncreate} ondestroy={ondestroy}>
-                <div key="modal-content" className="modal-content">
+                 style="padding: 0 24px;" oncreate={oncreate} ondestroy={ondestroy}>
+                <div key="modal-content">
 
-                    <h4 key="memu-title">
+                    {/* <h4 key="memu-title">
                         {i18n.Menu.Title()}&nbsp;
                         <span style={style({ color: '#999', fontSize: '50%' })}>[{i18n.Menu.Build(version)}]</span>
-                    </h4>
+                    </h4> */}
 
                     <div key="menu-top" style={divProperties}>
-                        {screen === Screens.Editor ?
+                        {/* {screen === Screens.Editor ?
                             <SettingButton key="btn-readonly" datatest="btn-readonly" href="#"
                                            icons={[{ name: 'visibility', size: 31.25 }]}
                                            onclick={() => {
                                                actions.changeToReaderScreen();
                                                actions.closeMenuModal();
                                            }}>{i18n.Menu.Buttons.Readonly()}</SettingButton>
-                            : undefined}
+                            : undefined} */}
 
                         {screen === Screens.Reader ?
                             <SettingButton key="btn-writable" datatest="btn-writable" href="#"
@@ -102,7 +165,7 @@ export const MenuModal: Component<MenuProps> = (
                                            }}>{i18n.Menu.Buttons.Writable()}</SettingButton>
                             : undefined}
 
-                        <SettingButton key="btn-copy-fumen" datatest="btn-copy-fumen" href="#"
+                        <SettingButton key="btn-copy-fumen" datatest="btn-copy-fumen" href="#" //
                                        icons={[{ name: 'content_copy', size: 29.3 }]}
                                        onclick={() => {
                                            actions.removeUnsettledItems();
@@ -180,14 +243,14 @@ export const MenuModal: Component<MenuProps> = (
                             {i18n.Menu.Buttons.ClearToEnd()}
                         </SettingButton>
 
-                        <SettingButton key="btn-user-settings" datatest="btn-user-settings" href="#"
+                        {/* <SettingButton key="btn-user-settings" datatest="btn-user-settings" href="#"
                                        icons={[{ name: 'build', size: 30 }]}
                                        onclick={() => {
                                            actions.closeMenuModal();
                                            actions.openUserSettingsModal();
                                        }}>
                             {i18n.Menu.Buttons.UserSettings()}
-                        </SettingButton>
+                        </SettingButton> */}
 
                         {comment !== CommentType.PageSlider ?
                             <SettingButton key="btn-page-slider" href="#"
@@ -244,10 +307,28 @@ export const MenuModal: Component<MenuProps> = (
                             </SettingButton>
                             : undefined}
 
-                        <SettingButton key="btn-help" datatest="btn-help" href="./help.html"
+                        {/* <SettingButton key="btn-help" datatest="btn-help" href="./help.html"
                                        icons={[{ name: 'help_outline', size: 31.25 }]}>
                             {i18n.Menu.Buttons.Help()}
-                        </SettingButton>
+                        </SettingButton> */}
+
+                        <SettingButton2 key="btn-zui-jp" datatest="btn-zui-jp" href="#"
+                        onclick={() => {
+                            actions.removeUnsettledItems();
+                            clipboard('http://fumen.zui.jp/?')();
+                        }}
+                                       icons={[{ name: 'file_copy', size: 26 }]}>
+                                           zui.jp
+                        </SettingButton2>
+
+                        <SettingButton2 key="btn-raw-fumen" datatest="btn-raw-fumen" href="#"
+                        onclick={() => {
+                            actions.removeUnsettledItems();
+                            clipboard('')();
+                        }}
+                                       icons={[{ name: 'file_copy', size: 26 }]}>
+                                           raw
+                        </SettingButton2>
 
                         <div style={style({ height: px(10), width: '100%' })}/>
                     </div>
@@ -304,4 +385,50 @@ export const SettingButton: ComponentWithText<SettingButtonProps> = (
             {showName}
         </div>
     </a>;
+};
+
+export const SettingButton2: ComponentWithText<SettingButtonProps> = (
+    { href = '#', key, onclick, icons, datatest, textSize = 13, enable = true }, showName,
+) => {
+    const iconsElements = icons.map(icon => (
+        <i key={`${key}-icon-${icon.name}`} className={`material-icons ${enable ? ' ' : 'disabled'}`}
+           style={style({
+               fontSize: px(icon.size),
+               color: 'white'
+           })}
+        >
+            {icon.name}
+        </i>
+    ));
+    return <div>
+        <a key={key} href={href} onclick={onclick !== undefined ? (event: MouseEvent) => {
+            onclick(event);
+            event.stopPropagation();
+            event.preventDefault();
+        } : undefined}>
+            <div key={`${key}-icon`} datatest={datatest}
+                className={`waves-effect ${enable ? ' ' : 'disabled'} teal`}
+                style={style({
+                    width: px(50),
+                    height: px(40),
+                    lineHeight: px(40),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: enable ? '#333' : '#bdbdbd',
+                    margin: px(5),
+                    // border: `solid 1px ${enable ? '#999' : '#bdbdbd'}`,
+                    boxSizing: 'border-box',
+                    cursor: 'pointer',
+                    borderRadius: '2px'
+                })}
+            >
+                {...iconsElements}
+            </div>
+        </a>
+        <div key={`${key}-text`}
+                style={style({ textAlign: 'center', fontSize: px(textSize), color: enable ? '#333' : '#bdbdbd' })}>
+                {showName}
+        </div>
+    </div>;
 };

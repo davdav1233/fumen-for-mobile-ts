@@ -30,6 +30,10 @@ export class Field {
         this.playField.put(action);
     }
 
+    deleteAt(index: number): void {
+        this.playField.setAt(index, Piece.Empty)
+    }
+
     setToPlayField(index: number, value: number): void {
         this.playField.setAt(index, value);
     }
